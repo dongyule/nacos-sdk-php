@@ -1,0 +1,25 @@
+{
+    "name": "hcz/nacos-sdk-php",
+    "description": "PHP SDK For Nacos",
+    "type": "library",
+    "require": {
+        "php": "^7.3",
+        "ext-json": "*",
+        "guzzlehttp/guzzle": "^6.3|^7.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Nacos\\": "src/"
+        }
+    },
+    "require-dev": {
+        "ext-pcntl": "*",
+        "phpunit/phpunit": "~7.0|~8.0|~9.0",
+        "php-coveralls/php-coveralls": "^2.4"
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Nacos\\Tests\\": "tests"
+        }
+    }
+}
