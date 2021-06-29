@@ -20,7 +20,7 @@ class Instance extends Client
      * @param ServiceInstance $instance
      * @return boolean
      */
-    public function add(ServiceInstance $instance)
+    public function register(ServiceInstance $instance)
     {
         $instance->validate();
         $resp = $this->request('POST', '/nacos/v1/ns/instance', ['form_params' => $instance->toCreateParams()]);
@@ -78,7 +78,7 @@ class Instance extends Client
         $query = array_filter([
             'serviceName' => $serviceName,
             'namespaceId' => $namespaceId,
-            'clusters' => join(',', $clusters),
+            'clusters' => implode(',', $clusters),
             'healthyOnly' => $healthyOnly,
         ]);
 
@@ -109,7 +109,7 @@ class Instance extends Client
      * @param bool $healthyOnly        是否只返回健康实例
      * @return ServiceInstance
      */
-    public function get(
+    public function detail(
         string $serviceName,
         string $ip,
         int $port,
@@ -199,9 +199,7 @@ class Instance extends Client
             'base_uri' => "http://{$instance->ip}:{$instance->port}",
             'timeout' => $this->timeout
         ]);
-
         return $client->request($method, $uri, $options);
-
     }
 
 }

@@ -21,7 +21,7 @@ class Config extends Client
      * @return string
      * @throws NacosConfigNotFound
      */
-    public function get(string $dataId, string $group = self::DEFAULT_GROUP)
+    public function get(string $dataId, string $group = Client::DEFAULT_GROUP)
     {
         $query = [
             'dataId' => $dataId,
@@ -67,7 +67,7 @@ class Config extends Client
         }
 
         $resp = $this->request('POST', '/nacos/v1/cs/configs', ['form_params' => $formParams]);
-        return $this->assertResponse($resp, 'true', "Nacos Client update config fail");
+        return $this->assertResponse($resp, 'true', "Nacos Client publish config fail");
     }
 
     /**
@@ -78,7 +78,7 @@ class Config extends Client
      * @return string
      * @throws NacosRequestException
      */
-    public function delete(string $dataId, string $group = self::DEFAULT_GROUP)
+    public function delete(string $dataId, string $group = Client::DEFAULT_GROUP)
     {
         $query = [
             'dataId' => $dataId,
@@ -107,9 +107,9 @@ class Config extends Client
             if ($cache->namespace) {
                 $items[] = $cache->namespace;
             }
-            $configStringList[] = join(self::WORD_SEPARATOR, $items);
+            $configStringList[] = join(Client::WORD_SEPARATOR, $items);
         }
-        $configString = join(self::LINE_SEPARATOR, $configStringList) . self::LINE_SEPARATOR;
+        $configString = join(Client::LINE_SEPARATOR, $configStringList) . Client::LINE_SEPARATOR;
 
         $resp = $this->request('POST', '/nacos/v1/cs/configs/listener', [
             'timeout' => $timeout + $this->timeout,
@@ -149,7 +149,6 @@ class Config extends Client
      * @param string $group
      * @param string $format
      * @return array
-     * @author Tinywan(ShaoBo Wan)
      */
     public function getParsedConfigs(
         string $dataId,

@@ -15,6 +15,11 @@ class ServiceInstance
     public $serviceName;
 
     /**
+     * @var null|string
+     */
+    public $groupName;
+
+    /**
      * 服务实例 IP，不能为空
      * @var string
      */
@@ -48,7 +53,7 @@ class ServiceInstance
      * 是否上线
      * @var boolean
      */
-    public $enable;
+    public $enabled;
 
     /**
      * 扩展信息
@@ -61,6 +66,11 @@ class ServiceInstance
      * @var string
      */
     public $clusterName;
+
+    /**
+     * @var null|bool
+     */
+    public $ephemeral;
 
     /**
      * @var bool
@@ -121,10 +131,12 @@ class ServiceInstance
             'port' => $this->port,
             'namespaceId' => $this->namespaceId,
             'weight' => $this->getWeightDouble(),
-            'enable' => $this->enable,
+            'enabled' => $this->enabled,
             'healthy' => $this->healthy,
             'metadata' => $this->getMetadataJson(),
             'clusterName' => $this->clusterName,
+            'groupName' => $this->groupName,
+            'ephemeral' => $this->ephemeral,
         ]);
     }
 
@@ -132,22 +144,24 @@ class ServiceInstance
     {
         return $this->filter([
             'serviceName' => $this->serviceName,
+            'groupName' => $this->groupName,
             'ip' => $this->ip,
             'port' => $this->port,
             'clusterName' => $this->clusterName,
             'namespaceId' => $this->namespaceId,
+            'ephemeral' => $this->ephemeral,
         ]);
     }
 
     public function toBeatParams()
     {
         return $this->filter([
+            "serviceName" => $this->serviceName,
             "cluster" => $this->clusterName,
             "ip" => $this->ip,
             "metadata" => $this->metadata,
             "port" => $this->port,
             "scheduled" => true,
-            "serviceName" => $this->serviceName,
             "weight" => $this->weight,
         ]);
     }
@@ -156,14 +170,16 @@ class ServiceInstance
     {
         return $this->filter([
             'serviceName' => $this->serviceName,
+            'groupName' => $this->groupName,
             'ip' => $this->ip,
             'port' => $this->port,
             'namespaceId' => $this->namespaceId,
             'weight' => $this->getWeightDouble(),
-            'enable' => $this->enable,
+            'enabled' => $this->enabled,
             'healthy' => $this->healthy,
             'metadata' => $this->getMetadataJson(),
             'clusterName' => $this->clusterName,
+            'ephemeral' => $this->ephemeral,
         ]);
     }
 

@@ -83,7 +83,7 @@ $instance->port = 80;
 $instance->healthy = true;
 $instance->ephemeral = false;
 
-$isSuccess = $client->add($instance);
+$isSuccess = $client->register($instance);
 if(true === $isSuccess) {
     echo '[x] create service instance success ', "\n";
 } else {
@@ -115,7 +115,7 @@ if(true === $isSuccess) {
   - int $timeout = 30
 ### Instance API
 
-- add
+- register
   - ServiceInstance $instance
 - delete
   - string $serviceName

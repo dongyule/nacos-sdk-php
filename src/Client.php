@@ -78,6 +78,7 @@ class Client
      * @param string $uri
      * @param array $options
      * @return \Psr\Http\Message\ResponseInterface
+     * @throws \Exception
      */
     protected function request(string $method, string $uri, array $options = [])
     {
@@ -97,9 +98,6 @@ class Client
         } catch (RequestException $exception) {
             throw new NacosRequestException($exception->getMessage());
         }
-        if (404 === $resp->getStatusCode()) {
-            throw new NacosConfigNotFound($resp->getReasonPhrase());
-        }
         return $resp;
     }
 
@@ -109,7 +107,6 @@ class Client
      * @param $expected
      * @param $message
      * @return bool
-     * @author Tinywan(ShaoBo Wan)
      */
     protected function assertResponse(\Psr\Http\Message\ResponseInterface $resp, $expected, $message)
     {
