@@ -10,7 +10,7 @@ Nacos-Sdk-PHP for PHP client allows you to access Nacos OpenAPI. [Open API Guide
 ## Installation
 
 ```powershell
-composer require tinywan/nacos-sdk-php
+composer require hcz/nacos-sdk-php
 ```
 ## Getting Started
 
