@@ -75,6 +75,10 @@ class Instance extends Client
         array $clusters = [],
         bool $healthyOnly = false
     ) {
+        if (empty($namespaceId)) {
+            $namespaceId = $this->namespace;
+        }
+
         $query = array_filter([
             'serviceName' => $serviceName,
             'namespaceId' => $namespaceId,
@@ -117,6 +121,9 @@ class Instance extends Client
         string $cluster = null,
         bool $healthyOnly = false
     ) {
+        if (empty($namespaceId)) {
+            $namespaceId = $this->namespace;
+        }
         $query = array_filter(compact(
             'serviceName',
             'ip',
