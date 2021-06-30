@@ -21,7 +21,7 @@ class Config extends Client
      * @return string
      * @throws NacosConfigNotFound
      */
-    public function get(string $dataId, string $group = Client::DEFAULT_GROUP)
+    public function get(string $dataId, string $group = self::DEFAULT_GROUP)
     {
         $query = [
             'dataId' => $dataId,
@@ -78,7 +78,7 @@ class Config extends Client
      * @return string
      * @throws NacosRequestException
      */
-    public function delete(string $dataId, string $group = Client::DEFAULT_GROUP)
+    public function delete(string $dataId, string $group = self::DEFAULT_GROUP)
     {
         $query = [
             'dataId' => $dataId,
