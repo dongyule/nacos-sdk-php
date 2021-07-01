@@ -86,7 +86,7 @@ class Instance extends AbstractNacos
         return Json::decode((string) $response->getBody());
     }
 
-    public function beat(ServiceModel $serviceModel, InstanceModel $instanceModel): array
+    public function beat(ServiceModel $serviceModel, InstanceModel $instanceModel)
     {
         $serviceName = $serviceModel->serviceName;
         $groupName = $serviceModel->groupName;
@@ -101,7 +101,7 @@ class Instance extends AbstractNacos
             RequestOptions::QUERY => $params,
         ]);
 
-        return Json::decode((string) $response->getBody());
+        return (string) $response->getBody() === 'ok';
     }
 
     public function updateHealth(InstanceModel $instanceModel): bool
