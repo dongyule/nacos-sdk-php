@@ -37,8 +37,7 @@ class Config extends AbstractNacos
         $response = $this->request('POST', '/nacos/v1/cs/configs', [
             RequestOptions::FORM_PARAMS => $configModel->toArray(),
         ]);
-
-        return (string) $response->getBody() === 'ok';
+        return (string) $response->getBody() === 'true';
     }
 
     public function delete(ConfigModel $configModel)
@@ -47,6 +46,6 @@ class Config extends AbstractNacos
             RequestOptions::QUERY => $configModel->toArray(),
         ]);
 
-        return (string) $response->getBody() === 'ok';
+        return (string) $response->getBody() === 'true';
     }
 }

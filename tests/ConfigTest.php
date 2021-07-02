@@ -24,15 +24,13 @@ class ConfigTest extends TestCase
             'tenant' => 'public',
             'data_id' => 'test.json',
             'group' => 'DEFAULT_GROUP',
-            'content' => 'test value'
+            'content' => '{"name":"v1"}',
         ]);
         $publishResult = $this->config->set($configModel);
         self::assertTrue($publishResult);
 
-        sleep(1);
-
         $newValue = $this->config->get($configModel);
-        self::assertSame('test value', $newValue);
+        self::assertSame('{"name":"v1"}', $newValue);
 
         $removeResult = $this->config->delete($configModel);
         self::assertTrue($removeResult);
