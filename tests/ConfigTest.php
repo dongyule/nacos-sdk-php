@@ -2,6 +2,7 @@
 
 namespace Nacos\Tests;
 
+use GuzzleHttp\Exception\GuzzleException;
 use Nacos\Config;
 use Nacos\Model\ConfigModel;
 use PHPUnit\Framework\AssertionFailedError;
@@ -21,7 +22,6 @@ class ConfigTest extends TestCase
     public function testConfig()
     {
         $configModel = new ConfigModel([
-            'tenant' => 'public',
             'data_id' => 'test.json',
             'group' => 'DEFAULT_GROUP',
             'content' => '{"name":"v1"}',
@@ -29,6 +29,7 @@ class ConfigTest extends TestCase
         $publishResult = $this->config->set($configModel);
         self::assertTrue($publishResult);
 
+        sleep(1);
         $newValue = $this->config->get($configModel);
         self::assertSame('{"name":"v1"}', $newValue);
 
@@ -47,10 +48,8 @@ class ConfigTest extends TestCase
         try {
             $this->config->get($configModel);
             self::assertEmpty(false, 'Failed to throw an exception, this line should not be executed');
-        } catch (AssertionFailedError $e) {
-            throw $e;
         } catch (\Throwable $e) {
-            //self::assertInstanceOf(NacosConfigNotFound::class, $e);
+            self::assertInstanceOf(GuzzleException::class, $e);
         }
     }
 

@@ -6,6 +6,11 @@ namespace Nacos;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\RequestOptions;
+use GuzzleHttp\Exception\ConnectException;
+use GuzzleHttp\Exception\RequestException;
+use Nacos\Exception\RequestException as NacosRequestException;
+use Nacos\Exception\NotFoundException;
+use Nacos\Exception\ConnectionException;
 
 abstract class AbstractNacos
 {
@@ -41,7 +46,14 @@ abstract class AbstractNacos
 
     public function request($method, $uri, array $options = [])
     {
-        return $this->client()->request($method, $uri, $options);
+        try {
+            $resp = $this->client()->request($method, $uri, $options);
+        } catch (ConnectException $connectException) {
+            throw new ConnectionException("[Nacos Server] " . $connectException->getMessage());
+        } catch (RequestException $exception) {
+            throw new NacosRequestException($exception->getMessage());
+        }
+        return $resp;
     }
 
     public function getServerUri(): string
