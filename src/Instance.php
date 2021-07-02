@@ -72,9 +72,7 @@ class Instance extends AbstractNacos
             return $item['enabled'] && $item['healthy'];
         });
 
-        $tactics = strtolower($this->config->get('nacos.load_balancer', 'random'));
-
-        return $this->loadBalancer($enabled, $tactics);
+        return $this->loadBalancer($enabled, 'random');
     }
 
     public function detail(InstanceModel $instanceModel): array
