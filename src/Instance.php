@@ -5,16 +5,18 @@ declare(strict_types=1);
 namespace Nacos;
 
 use GuzzleHttp\RequestOptions;
-use Hyperf\LoadBalancer\LoadBalancerManager;
-use Hyperf\LoadBalancer\Node;
 use Nacos\Model\InstanceModel;
 use Nacos\Model\ServiceModel;
 use Nacos\Utils\Codec\Json;
+use Nacos\Utils\RandomByWeightSelector;
 
 class Instance extends AbstractNacos
 {
     public function register(InstanceModel $instanceModel): bool
     {
+        if (is_array($instanceModel->metadata)) {
+            $instanceModel->metadata = json_encode($instanceModel->metadata);
+        }
         $response = $this->request('POST', '/nacos/v1/ns/instance', [
             RequestOptions::QUERY => $instanceModel->toArray(),
         ]);
@@ -33,8 +35,10 @@ class Instance extends AbstractNacos
 
     public function update(InstanceModel $instanceModel): bool
     {
+        if (is_array($instanceModel->metadata)) {
+            $instanceModel->metadata = json_encode($instanceModel->metadata);
+        }
         $instanceModel->healthy = null;
-
         $response = $this->request('PUT', '/nacos/v1/ns/instance', [
             RequestOptions::QUERY => $instanceModel->toArray(),
         ]);
@@ -71,11 +75,17 @@ class Instance extends AbstractNacos
         $enabled = array_filter($instance, function ($item) {
             return $item['enabled'] && $item['healthy'];
         });
+        if ($enabled) {
+            $instances = [];
+            foreach ($enabled as $node) {
+                $instances[] = new Model\InstanceModel($node);
+            }
+        }
 
-        return $this->loadBalancer($enabled, 'random');
+        return RandomByWeightSelector::select($instances);
     }
 
-    public function detail(InstanceModel $instanceModel): array
+    public function detail(InstanceModel $instanceModel) : array
     {
         $response = $this->request('GET', '/nacos/v1/ns/instance', [
             RequestOptions::QUERY => $instanceModel->toArray(),
@@ -94,12 +104,10 @@ class Instance extends AbstractNacos
             return $item !== null;
         });
         $params['beat'] = $instanceModel->toJson();
-
         $response = $this->request('PUT', '/nacos/v1/ns/instance/beat', [
             RequestOptions::QUERY => $params,
         ]);
-
-        return (string) $response->getBody() === 'ok';
+        return Json::decode((string) $response->getBody());
     }
 
     public function updateHealth(InstanceModel $instanceModel): bool
@@ -115,29 +123,4 @@ class Instance extends AbstractNacos
         return (string) $response->getBody() === 'ok';
     }
 
-    protected function loadBalancer(array $nodes, $tactics = 'random')
-    {
-        $loadNodes = [];
-        $nacosNodes = [];
-        /** @var array|InstanceModel $node */
-        foreach ($nodes as $node) {
-            if (is_array($node)) {
-                $node = (object) $node;
-            }
-            $loadNodes[] = new Node($node->ip, $node->port, (int) $node->weight);
-            $key = sprintf('%s:%d', $node->ip, $node->port);
-            $nacosNodes[$key] = $node;
-        }
-
-        $loadBalancerManager = new LoadBalancerManager();
-        /** @var \Hyperf\LoadBalancer\LoadBalancerInterface $loadBalancer */
-        $loadBalancer = $loadBalancerManager->get($tactics);
-        $loadBalancer->setNodes($loadNodes);
-
-        /** @var Node $availableNode */
-        $availableNode = $loadBalancer->select();
-
-        $key = sprintf('%s:%d', $availableNode->host, $availableNode->port);
-        return $nacosNodes[$key];
-    }
 }

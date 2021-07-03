@@ -30,6 +30,11 @@ abstract class AbstractNacos
     protected $url;
 
     /**
+     * @var integer
+     */
+    protected $timeout = 3;
+
+    /**
      * @var array
      */
     protected $config;
@@ -44,8 +49,19 @@ abstract class AbstractNacos
         $this->config = $config;
     }
 
+    /**
+     * @param int $timeout
+     */
+    public function setTimeout(int $timeout)
+    {
+        $this->timeout = $timeout;
+    }
+
     public function request($method, $uri, array $options = [])
     {
+        if (!isset($options['timeout'])) {
+            $options['timeout'] = $this->timeout;
+        }
         try {
             $resp = $this->client()->request($method, $uri, $options);
         } catch (ConnectException $connectException) {
@@ -72,6 +88,7 @@ abstract class AbstractNacos
     {
         return new Client([
             'base_uri' => $this->getServerUri(),
+            'timeout' => $this->timeout,
             'handler' => $this->handler,
             RequestOptions::HEADERS => [
                 'charset' => 'UTF-8',

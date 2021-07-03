@@ -2,12 +2,12 @@
 
 namespace Nacos\Tests;
 
-use GuzzleHttp\Exception\GuzzleException;
 use Nacos\Config;
 use Nacos\Model\ConfigModel;
 use PHPUnit\Framework\AssertionFailedError;
+use Nacos\Exception\RequestException;
 
-class ConfigTest extends TestCase
+class ConfigTest extends \PHPUnit\Framework\TestCase
 {
     protected $config;
 
@@ -47,54 +47,57 @@ class ConfigTest extends TestCase
         ]);
         try {
             $this->config->get($configModel);
-            self::assertEmpty(false, 'Failed to throw an exception, this line should not be executed');
+            self::assertTrue(false, 'Failed to throw an exception, this line should not be executed');
         } catch (\Throwable $e) {
-            self::assertInstanceOf(GuzzleException::class, $e);
+            self::assertInstanceOf(RequestException::class, $e);
         }
     }
 
     public function testListenConfig()
     {
-        $dataId = 'nginx.conf';
-        $group = 'DEFAULT_GROUP';
-
-        $client = new Config('172.17.0.115', 8848);
-        $client->setTimeout(1);
-        $content = $client->get($dataId, $group);
-        $contentMd5 = md5($content);
+        $configModel = new ConfigModel([
+            'dataId' => 'nginx.conf',
+            'group' => 'DEFAULT_GROUP'
+        ]);
+        $content = $this->config->get($configModel);
+        $configModel->content = $content;
         $pid = pcntl_fork();
         if ($pid === 0) {
             // fork child process
             sleep(2);
-            $success = $client->set($dataId, $group, 'world=hello' . microtime());
+            $configModel = new ConfigModel([
+                'dataId' => 'nginx.conf',
+                'group' => 'DEFAULT_GROUP',
+                'content' => 'world=hello' . microtime(),
+            ]);
+            $success = $this->config->set($configModel);
             self::assertTrue($success);
             exit; // child process exit
         }
 
-        $cache = new ConfigModel();
-        $cache->dataId = $dataId;
-        $cache->group = $group;
-        $cache->contentMd5 = $contentMd5;
-        $result = $client->listen([$cache]);
+        $result = $this->config->listen([$configModel]);
         self::assertTrue(is_array($result));
-        self::assertSame($dataId, $result[0]->dataId);
-        self::assertSame($group, $result[0]->group);
+        self::assertSame('nginx.conf', $result[0]->dataId);
+        self::assertSame('DEFAULT_GROUP', $result[0]->group);
     }
 
     public function testGetParsedConfigs()
     {
         $content = "hello=world\nabc=efg";
-        $success = $this->config->set('config.properties', 'group_name', $content);
+        $configModel = new ConfigModel([
+            'dataId' => 'nginx.conf',
+            'group' => 'DEFAULT_GROUP',
+            'content'=> $content,
+            'type' => 'properties'
+        ]);
+        $success = $this->config->set($configModel);
         self::assertTrue($success);
 
         sleep(1);
 
         $expected = ['hello' => 'world', 'abc' => 'efg'];
 
-        $res = $this->config->getParsedConfigs('config.properties', 'group_name');
-        self::assertSame($expected, $res);
-
-        $res = $this->config->getParsedConfigs('config.properties', 'group_name', false);
+        $res = $this->config->get($configModel, true);
         self::assertSame($expected, $res);
     }
 

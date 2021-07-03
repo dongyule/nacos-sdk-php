@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Nacos\Model;
 
 use Nacos\Utils\Codec\Xml;
+use Nacos\Utils\Codec\Properties;
 
 class ConfigModel extends AbstractModel
 {
@@ -50,6 +51,8 @@ class ConfigModel extends AbstractModel
                 return is_array($originConfig) ? $originConfig : yaml_parse($originConfig);
             case 'xml':
                 return Xml::toArray($originConfig);
+            case 'properties':
+                return Properties::parse($originConfig);
             default:
                 return $originConfig;
         }

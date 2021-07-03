@@ -62,6 +62,11 @@ class InstanceModel extends AbstractModel
     public $healthy;
 
     /**
+     * @var null|string
+     */
+    public $instanceId;
+
+    /**
      * @var string[]
      */
     public $requiredFields = [
@@ -69,4 +74,10 @@ class InstanceModel extends AbstractModel
         'port',
         'serviceName',
     ];
+
+    public function getWeightDouble()
+    {
+        return $this->weight ? doubleval($this->weight) : 0;
+    }
+
 }
